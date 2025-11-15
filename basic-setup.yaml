@@ -65,3 +65,23 @@
       service:
         name: chronyd
         state: restarted
+        
+- name: Install Unattended Updates
+  hosts: sdr-station
+  gather_facts: yes
+  tasks:
+    - name: Install unattended-upgrades package
+      apt:
+        pkg: unattended-upgrades
+        state: present
+        update_cache: yes
+    - name: Configure unattended upgrades
+      lineinfile:
+        path: /etc/apt/apt.conf.d/20auto-upgrades
+        line: "{{ item }}"
+        state: present
+        create: yes
+      loop:
+        - 'APT::Periodic::Update-Package-Lists "1";'
+        - 'APT::Periodic::Unattended-Upgrade "1";'
+        - 'APT::Periodic::AutocleanInterval "7";'

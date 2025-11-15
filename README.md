@@ -5,6 +5,7 @@ This project provides an Ansible playbook for setting up and configuring an SDR 
 ## Features
 
 - Automated system updates and package upgrades
+- Unattended updates configuration
 - SSH key management with allow/block lists
 - NTP synchronization using Chrony
 - User creation and management
@@ -38,7 +39,7 @@ This project provides an Ansible playbook for setting up and configuring an SDR 
 
 Run the main playbook:
 ```bash
-ansible-playbook -i inventory.ini playbook.yaml
+ansible-playbook --ask-become-pass -i inventory.ini playbook.yaml
 ```
 
 This will execute the basic setup and system configuration tasks.
