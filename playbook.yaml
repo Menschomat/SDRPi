@@ -1,0 +1,34 @@
+---
+- import_playbook: basic-setup.yaml
+
+- hosts: sdr-station
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+
+    - name: Check if reboot is required
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot if required
+      reboot:
+        reboot_timeout: 600
+      when: reboot_required.stat.exists
+
+    - name: Check if user sdr-system exists
+      getent:
+        database: passwd
+        key: sdr-system
+      register: user_check
+
+    - name: Create user sdr-system if not exists
+      user:
+        name: sdr-system
+        state: present
+      when: user_check.failed

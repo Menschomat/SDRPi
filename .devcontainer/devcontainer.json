@@ -1,0 +1,30 @@
+{
+    "name": "Ansible Development",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers-extra/features/ansible:2": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "redhat.ansible",
+                "kilocode.kilo-code"
+            ]
+        }
+    },
+    // Mounts for credential forwarding (cross-platform)
+    "mounts": [
+        {
+            "source": "${localEnv:USERPROFILE}${localEnv:HOME}/.gitconfig",
+            "target": "/home/vscode/.gitconfig",
+            "type": "bind",
+            "consistency": "cached"
+        },
+        {
+            "source": "${localEnv:USERPROFILE}${localEnv:HOME}/.ssh",
+            "target": "/home/vscode/.ssh",
+            "type": "bind",
+            "consistency": "cached"
+        }
+    ]
+}

@@ -1,0 +1,67 @@
+- name: Deploy SSH Key
+  hosts: sdr-station
+  gather_facts: yes
+  vars:
+    allowed_keys_file: "keys/allowed.pub"
+    blocked_keys_file: "keys/blocked.pub"
+  tasks:
+    - name: Deploy SSH keys
+      import_tasks: utils/deploy_ssh_keys.yml
+    - name: Disable SSH password authentication.
+      lineinfile: path=/etc/ssh/sshd_config
+        regexp="^PasswordAuthentication"
+        line="PasswordAuthentication no"
+        state=present
+      notify: restart sshd
+  handlers:
+    - name: restart sshd
+      service: name=ssh state=restarted
+
+- name: Setup NTP
+  hosts: sdr-station
+  gather_facts: yes
+  vars:
+    ntp_servers:
+      - ptbtime1.ptb.de
+      - ptbtime2.ptb.de
+      - ptbtime3.ptb.de
+  tasks:
+    - name: install dependencies
+      apt:
+        pkg:
+          - chrony
+        state: latest
+        update_cache: yes  
+    - name: Get current NTP servers
+      shell: grep "^server " /etc/chrony/chrony.conf | awk '{print $2}'
+      register: current_servers
+      changed_when: false
+
+    - name: Remove extra NTP servers
+      lineinfile:
+        path: /etc/chrony/chrony.conf
+        regexp: "^server {{ item }}"
+        state: absent
+      loop: "{{ current_servers.stdout_lines }}"
+      when: item not in ntp_servers
+      notify: restart chronyd
+
+    - name: Add specified NTP servers to chrony
+      lineinfile:
+        path: /etc/chrony/chrony.conf
+        line: "server {{ item }} iburst"
+        state: present
+      loop: "{{ ntp_servers }}"
+      notify:
+        - restart chronyd
+
+    - name: Ensure chronyd is enabled and running
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+  handlers:
+    - name: restart chronyd
+      service:
+        name: chronyd
+        state: restarted

@@ -1,0 +1,33 @@
+- name: Determine home directory
+  set_fact:
+    user_home: "{{ ansible_user_dir if ansible_user != 'root' else '/root' }}"
+
+- name: Ensure the .ssh directory exists
+  file:
+    path: "{{ user_home }}/.ssh"
+    state: directory
+    mode: "0700"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Read allowed keys from file
+  set_fact:
+    allowed_keys: "{{ lookup('file', allowed_keys_file).splitlines() }}"
+
+- name: Read blocked keys from file
+  set_fact:
+    blocked_keys: "{{ lookup('file', blocked_keys_file).splitlines() }}"
+
+- name: Add allowed keys to authorized_keys
+  authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ item }}"
+  loop: "{{ allowed_keys }}"
+  
+- name: Remove blocked keys from authorized_keys
+  authorized_key:
+    user: "{{ ansible_user }}"
+    state: absent
+    key: "{{ item }}"
+  loop: "{{ blocked_keys }}"
