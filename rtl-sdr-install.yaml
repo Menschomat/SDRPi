@@ -1,0 +1,66 @@
+---
+- name: Check if rtl-sdr is installed
+  command: dpkg -l rtl-sdr
+  register: rtl_sdr_check
+  failed_when: false
+  changed_when: false
+
+- name: Install build dependencies for rtl-sdr
+  apt:
+    name:
+      - libusb-1.0-0-dev
+      - git
+      - cmake
+      - build-essential
+      - pkg-config
+      - debhelper
+    state: present
+  when: rtl_sdr_check.rc != 0
+
+- name: Remove existing rtl-sdr directory if present
+  file:
+    path: /tmp/rtl-sdr
+    state: absent
+  when: rtl_sdr_check.rc != 0
+
+- name: Clone rtl-sdr repository
+  git:
+    repo: https://github.com/osmocom/rtl-sdr
+    dest: /tmp/rtl-sdr
+    version: master
+  when: rtl_sdr_check.rc != 0
+
+- name: Build rtl-sdr package
+  command: dpkg-buildpackage -b --no-sign
+  args:
+    chdir: /tmp/rtl-sdr
+  become: yes
+  when: rtl_sdr_check.rc != 0
+
+- name: Find rtl-sdr deb packages
+  find:
+    paths: /tmp
+    patterns: 'librtlsdr0_*.deb,librtlsdr-dev_*.deb,rtl-sdr_*.deb'
+    file_type: file
+  register: rtl_sdr_debs
+  when: rtl_sdr_check.rc != 0
+
+- name: Install rtl-sdr deb packages
+  command: dpkg -i --force-overwrite {{ item.path }}
+  become: yes
+  loop: "{{ rtl_sdr_debs.files }}"
+  when: rtl_sdr_check.rc != 0
+
+- name: Hold rtl-sdr packages to prevent OS updates
+  command: apt-mark hold rtl-sdr librtlsdr0 librtlsdr-dev
+  become: yes
+  when: rtl_sdr_check.rc != 0
+
+- name: Clean up rtl-sdr build files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/rtl-sdr
+    - "{{ rtl_sdr_debs.files | map(attribute='path') | list }}"
+  when: rtl_sdr_check.rc != 0

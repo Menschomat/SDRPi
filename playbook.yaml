@@ -21,6 +21,9 @@
         reboot_timeout: 600
       when: reboot_required.stat.exists
 
+    - name: Import rtl-sdr installation tasks
+      import_tasks: rtl-sdr-install.yaml
+
     - name: Create user sdr-system if not exists
       user:
         name: sdr-system
