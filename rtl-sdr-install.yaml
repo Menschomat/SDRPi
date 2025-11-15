@@ -56,6 +56,25 @@
   become: yes
   when: rtl_sdr_check.rc != 0
 
+- name: Install udev rules for rtl-sdr
+  copy:
+    src: /tmp/rtl-sdr/rtl-sdr.rules
+    dest: /etc/udev/rules.d/rtl-sdr.rules
+    mode: '0644'
+    remote_src: yes
+  become: yes
+
+
+- name: Reload udev rules
+  command: udevadm control --reload-rules
+  become: yes
+  when: rtl_sdr_check.rc != 0
+
+- name: Reload udev rules
+  command: udevadm trigger
+  become: yes
+  when: rtl_sdr_check.rc != 0
+
 - name: Clean up rtl-sdr build files
   file:
     path: "{{ item }}"

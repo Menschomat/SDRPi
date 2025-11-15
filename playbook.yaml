@@ -60,3 +60,29 @@
       apt:
         deb: /home/sdr-system/sdrpp_debian_trixie_aarch64.deb
       become: yes
+
+    - name: Create systemd service file for SDR++ server
+      copy:
+        dest: /etc/systemd/system/sdrpp-server.service
+        content: |
+          [Unit]
+          Description=SDR++ Server
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=root
+          ExecStart=/usr/bin/sdrpp --server
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+      become: yes
+
+    - name: Enable and start SDR++ server service
+      systemd:
+        name: sdrpp-server
+        enabled: yes
+        state: started
+      become: yes
