@@ -1,5 +1,5 @@
 ---
-- import_playbook: basic-setup.yaml
+#- import_playbook: basic-setup.yaml
 
 - hosts: sdr-station
   tasks:
@@ -21,14 +21,39 @@
         reboot_timeout: 600
       when: reboot_required.stat.exists
 
-    - name: Check if user sdr-system exists
-      getent:
-        database: passwd
-        key: sdr-system
-      register: user_check
-
     - name: Create user sdr-system if not exists
       user:
         name: sdr-system
         state: present
-      when: user_check.failed
+
+    - name: Get latest release info from GitHub API
+      uri:
+        url: https://api.github.com/repos/AlexandreRouma/SDRPlusPlus/releases/latest
+        return_content: yes
+      register: release_info
+
+    - name: Extract checksum from release assets
+      set_fact:
+        sdrpp_checksum: "{{ (release_info.content | from_json).assets | selectattr('name', 'equalto', 'sdrpp_debian_trixie_aarch64.deb') | map(attribute='digest') | first | regex_replace('^sha256:', '') }}"
+
+    - name: Check if SDR++ deb exists and get its checksum
+      stat:
+        path: /home/sdr-system/sdrpp_debian_trixie_aarch64.deb
+        checksum_algorithm: sha256
+      register: deb_stat
+
+    - name: Download SDR++ deb package
+      get_url:
+        url: https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_trixie_aarch64.deb
+        dest: /home/sdr-system/sdrpp_debian_trixie_aarch64.deb
+        owner: sdr-system
+        group: sdr-system
+        mode: '0644'
+        checksum: sha256:{{ sdrpp_checksum }}
+      become: yes
+      when: not deb_stat.stat.exists or deb_stat.stat.checksum != sdrpp_checksum
+
+    - name: Install SDR++ deb package
+      apt:
+        deb: /home/sdr-system/sdrpp_debian_trixie_aarch64.deb
+      become: yes
