@@ -1,4 +1,4 @@
-# SDR Station Ansible Setup
+# SDRPi - SDR Station Ansible Setup
 
 This project provides an Ansible playbook for setting up and configuring an SDR (Software Defined Radio) station on a Linux host.
 
