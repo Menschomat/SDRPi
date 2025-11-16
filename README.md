@@ -10,6 +10,9 @@ This project provides an Ansible playbook for setting up and configuring an SDR 
 - NTP synchronization using Chrony
 - User creation and management
 - Secure SSH configuration (password authentication disabled)
+- RTL-SDR driver installation from source
+- SDR++ (SDRPlusPlus) installation and setup
+- SDR++ server systemd service configuration
 
 ## Prerequisites
 
@@ -42,12 +45,36 @@ Run the main playbook:
 ansible-playbook --ask-become-pass -i inventory.ini playbook.yaml
 ```
 
-This will execute the basic setup and system configuration tasks.
+This will execute the complete SDR station setup including:
+- System updates and basic configuration
+- RTL-SDR driver installation
+- SDR++ installation and server setup
+- Systemd service configuration for SDR++ server
+
+## SDR++ Server
+
+After running the playbook, SDR++ will be running as a systemd service on the target host. The server listens on port 5259 by default.
+
+### Connecting to SDR++ Server
+
+1. Install SDR++ on your local machine from [https://github.com/AlexandreRouma/SDRPlusPlus](https://github.com/AlexandreRouma/SDRPlusPlus)
+
+2. Launch SDR++ locally
+
+3. In SDR++:
+   - Go to the "Source" menu
+   - Select "SDR++ Server"
+   - Enter the IP address of your SDR station and port 5259
+   - Connect to the server
+   - Once connected, select your SDR device from the available sources
+
+The SDR++ server allows you to control the SDR hardware remotely while running the processing on your local machine.
 
 ## Project Structure
 
-- `playbook.yaml` - Main Ansible playbook
-- `basic-setup.yaml` - Basic system setup tasks
+- `playbook.yaml` - Main Ansible playbook with SDR++ setup
+- `basic-setup.yaml` - Basic system setup tasks (SSH, NTP, unattended updates)
+- `rtl-sdr-install.yaml` - RTL-SDR driver installation tasks
 - `inventory.ini` - Ansible inventory file
 - `keys/` - SSH key management directory
 - `utils/` - Utility playbooks and tasks
