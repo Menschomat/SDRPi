@@ -1,5 +1,7 @@
 # SDRPi - SDR Station Ansible Setup
 
+![SDRPi Header](assets/header.webp)
+
 This project provides an Ansible playbook for setting up and configuring an SDR (Software Defined Radio) station on a Raspberry Pi running Debian-based 64-bit OS (ARM architecture).
 
 ## Features
@@ -11,7 +13,7 @@ This project provides an Ansible playbook for setting up and configuring an SDR 
 - User creation and management
 - Secure SSH configuration (password authentication disabled)
 - RTL-SDR driver installation from source
-- SDR++ (SDRPlusPlus) installation and setup
+- SDR++ ([SDRPlusPlus](https://github.com/AlexandreRouma/SDRPlusPlus)) installation and setup
 - SDR++ server systemd service configuration
 
 ## Prerequisites
