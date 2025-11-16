@@ -1,6 +1,6 @@
 # SDRPi - SDR Station Ansible Setup
 
-This project provides an Ansible playbook for setting up and configuring an SDR (Software Defined Radio) station on a Linux host.
+This project provides an Ansible playbook for setting up and configuring an SDR (Software Defined Radio) station on a Raspberry Pi running Debian-based 64-bit OS (ARM architecture).
 
 ## Features
 
@@ -18,7 +18,7 @@ This project provides an Ansible playbook for setting up and configuring an SDR 
 
 - Ansible installed on your control machine
 - SSH access to the target host
-- Target host running Ubuntu/Debian-based Linux
+- Target host: Raspberry Pi running Debian-based 64-bit OS (ARM64)
 
 ## Setup
 
@@ -50,6 +50,10 @@ This will execute the complete SDR station setup including:
 - RTL-SDR driver installation
 - SDR++ installation and server setup
 - Systemd service configuration for SDR++ server
+
+## RTL-SDR Hardware Setup
+
+The playbook automatically installs RTL-SDR drivers from source. For RTL-SDR V4 dongles or manual installation, refer to the official guide: [RTL-SDR V4 Driver Installation](https://www.rtl-sdr.com/V4/)
 
 ## SDR++ Server
 
